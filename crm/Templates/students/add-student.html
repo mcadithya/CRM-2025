@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block section %}
+<section class="container py-5 d-flex justify-content-center align-items-center">
+  <div class="page-inner w-100" style="max-width: 900px;">
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white text-center">
+        <h4 class="mb-0">Book an Appointment</h4>
+      </div>
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <!-- Name, Email, Phone -->
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label for="id_name" class="form-label">Name</label>
+              {{ form.name }}
+              {% if form.errors.name %}
+              <p class="text-sm text-bg-danger">{{ form.errors.name.0 }}</p>
+              {% endif %}
+            </div>
+            <div class="col-md-4">
+              <label for="id_email" class="form-label">Email</label>
+              {{ form.email }}
+              {% if form.errors.email %}
+              <p class="text-sm text-bg-danger">{{ form.errors.email.0 }}</p>
+              {% endif %}
+            </div>
+            <div class="col-md-4">
+              <label for="id_contact_num" class="form-label">Phone</label>
+              {{ form.contact_num }}
+              {% if form.errors.contact_num %}
+              <p class="text-sm text-bg-danger">{{ form.errors.contact_num.0 }}</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- DOB, Department, Doctor -->
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label for="id_dob" class="form-label">Date of Birth</label>
+              {{ form.dob }}
+              {% if form.errors.dob %}
+              <p class="text-sm text-bg-danger">{{ form.errors.dob.0 }}</p>
+              {% endif %}
+            </div>
+            <div class="col-md-4">
+              <label for="id_department" class="form-label">Department</label>
+              {{ form.department }}
+              {% if form.errors.department %}
+              <p class="text-sm text-bg-danger">{{ form.errors.department.0 }}</p>
+              {% endif %}
+            </div>
+            <div class="col-md-4">
+              <label for="id_doctor" class="form-label">Doctor</label>
+              {{ form.doctor }}
+              {% if form.errors.doctor %}
+              <p class="text-sm text-bg-danger">{{ form.errors.doctor.0 }}</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Message -->
+          <div class="mb-3">
+            <label for="id_message" class="form-label">Message (Optional)</label>
+            {{ form.message }}
+            {% if form.errors.message %}
+            <p class="text-sm text-bg-danger">{{ form.errors.message.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Submit -->
+          <div class="text-end">
+            <button type="reset" class="btn btn-secondary">Reset</button>
+            <button type="submit" class="btn btn-success">Make Appointment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

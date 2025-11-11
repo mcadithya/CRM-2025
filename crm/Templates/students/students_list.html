@@ -24,7 +24,8 @@
           <select class="form-select" id="filter1" name='course' onchange="this.form.submit()">
             <option selected disabled>course</option>
             {% for option in CourseChoices %}
-            <option {% if course == option.value %} selected {% endif %} value="{{ option.value }}">{{option.label}}
+            <!-- <option {% if course == option.value %} selected {% endif %} value="{{ option.value }}">{{option.label}} -->
+            <option {% if course == option.name %} selected {% endif %} value="{{ option.name }}">{{option.name}}
             </option>
 
             {% endfor %}
@@ -37,7 +38,8 @@
           <select name='batch' class="form-select" id="filter2" onchange="this.form.submit()">
             <option selected disabled>Batch</option>
             {% for option in BatchChoices %}
-            <option {% if batch == option.value %} selected {% endif %} value="{{option.value}}">{{ option.label}}
+            <!-- <option {% if batch == option.value %} selected {% endif %} value="{{option.value}}">{{ option.label}} -->
+               <option {% if batch == option.name %} selected {% endif %} value="{{option.name}}">{{ option.name}}
             </option>
             {% endfor %}
           </select>
@@ -48,7 +50,8 @@
           <select  name='trainer' class="form-select" id="filter3" onchange="this.form.submit()">
             <option selected disabled>Trainer</option>
             {% for option in TrainerChoices%}
-            <option {% if trainer == option.value %} selected {% endif %}  value ="{{option.value}}">{{ option.label }}</option>
+            <!-- <option {% if trainer == option.value %} selected {% endif %}  value ="{{option.value}}">{{ option.label }}</option> -->
+           <option {% if trainer == option.name %} selected {% endif %}  value ="{{option.name}}">{{ option.name }}</option>
             {% endfor %}
           </select>
         </form>

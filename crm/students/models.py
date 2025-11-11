@@ -86,6 +86,8 @@ class TrainerChoices(models.TextChoices):
 
 class Students(BaseClass):
 
+    profile = models.OneToOneField('authentication.Profile',on_delete = models.CASCADE)
+
     first_name = models.CharField(max_length=25)
 
     last_name = models.CharField(max_length=25)
@@ -110,11 +112,13 @@ class Students(BaseClass):
     
     pincode = models.CharField(max_length=6)
 
-    course = models.CharField(max_length=20, choices=CourseChoices.choices)
+    course = models.ForeignKey('course.Course',on_delete=models.CASCADE)  # appicationname.modelname , models.SET_NULL --- if delete the course then in student application fill with null 
 
-    batch = models.CharField(max_length=10,choices=BatchChoices.choices)
+    # batch = models.CharField(max_length=10,choices=BatchChoices.choices)
+    batch = models.ForeignKey('batch.Batch',on_delete=models.CASCADE)
 
-    trainer = models.CharField(max_length=15,choices=TrainerChoices.choices)
+    # trainer = models.CharField(max_length=15,choices=TrainerChoices.choices)
+    trainer = models.ForeignKey('trainer.Trainer',on_delete=models.CASCADE)
 
     join_date = models.DateField(auto_now_add=True) # if use auto_now -- then it will upate every chainge or update the field
 

@@ -1,11 +1,38 @@
 from django.shortcuts import render, redirect
+
 from django.views import View
 
 from .forms import AddStudentForm 
+
 from .models import Students,CourseChoices,BatchChoices,TrainerChoices
+
 from django.db.models import Q
-from crm.utils import generate_admission_number
+# we are created all separate application 
+from course.models import Course
+
+from trainer.models import Trainer
+
+from batch.models import Batch
+
+from django.db import transaction
+
+from authentication.models import Profile,OTP
+
+from decouple import config
+
+from crm.utils import generate_admission_number,generate_password,sent_email
 # Create your views here.
+# threading for parallel process exicution - 
+import threading 
+
+# permission
+# from django.contrib.auth.decorators import login_required
+
+from django.utils.decorators import method_decorator
+
+from authentication.permissions import permitted_users
+# @method_decorator(login_required(login_url='login'),name='dispatch')
+
 
 
 class DashBoardView(View):
@@ -15,7 +42,10 @@ class DashBoardView(View):
         data = {'title':"Dashboard"}
 
         return render(request,'students/dashboard.html', context=data)
-    
+
+
+@method_decorator(permitted_users(['Admin','Sales']), name='dispatch')   
+
 class StudentView(View):
 
     def get(self,request,*args,**kwargs):
@@ -27,7 +57,6 @@ class StudentView(View):
         batch = request.GET.get("batch")
 
         trainer = request.GET.get('trainer')
-
 
         students = Students.objects.filter(active_status = True)
 
@@ -48,7 +77,9 @@ class StudentView(View):
                                      )
         elif course:
 
-            students = students.filter(course=course)
+            students = students.filter(course__name=course) # in orm . replaced by __ (double underscore)
+
+            # students = students.filter(course=course)
 
         elif batch:
 
@@ -60,13 +91,19 @@ class StudentView(View):
 
         
 
+        # data = {"title" : "Students List","students":students,
+        #        'CourseChoices':CourseChoices,'BatchChoices':BatchChoices,
+        #        'TrainerChoices':TrainerChoices,"query":query,
+        #        'course':course,'batch':batch,'trainer': trainer}
+
+        # separate apllication then 
         data = {"title" : "Students List","students":students,
-               'CourseChoices':CourseChoices,'BatchChoices':BatchChoices,
-               'TrainerChoices':TrainerChoices,"query":query,
+               'CourseChoices':Course.objects.all(),'BatchChoices':Batch.objects.all(),
+               'TrainerChoices':Trainer.objects.all(),"query":query,
                'course':course,'batch':batch,'trainer': trainer}
 
         return render(request,'students/students_list.html', context=data)
-    
+@method_decorator(permitted_users(['Admin','Sales']), name='dispatch')    
 class StudentDetailsView(View):
 
     def get(self,request,*args,**kwargs):
@@ -97,7 +134,7 @@ class StudentDetailsView(View):
 
 
 # Perform Soft Delete
-
+@method_decorator(permitted_users(['Admin','Sales']), name='dispatch') 
 class StudentDeleteView(View):
 
     def get(self,request,*args,**kwargs):
@@ -112,7 +149,7 @@ class StudentDeleteView(View):
 
         return redirect('students-list')
 
-
+@method_decorator(permitted_users(['Admin','Sales']), name='dispatch') 
 class AddStudentView(View):
 
     form_class = AddStudentForm
@@ -121,25 +158,61 @@ class AddStudentView(View):
 
         form  = self.form_class()
 
+        # print(request.user._meta.get_fields())   
+
         data = {"form":form,'title':"Add Student"}
 
         return render(request,'students/add-student.html',context = data)
     
-    def post(self,request,*args,**kwargs):
 
+    def post(self,request,*args,**kwargs):
+        
         form =self.form_class(request.POST,request.FILES)
 
         if form.is_valid():
 
-            student = form.save(commit=False)
+            with transaction.atomic():
 
-            adm_num = generate_admission_number()
+                student = form.save(commit=False)
 
-            student.adm_num = adm_num
+                adm_num = generate_admission_number()
 
-            form.save()
+                student.adm_num = adm_num
 
-            return redirect("students-list")
+                email = form.cleaned_data.get('email')
+
+                password = generate_password()
+
+                print(password)
+
+                profile = Profile.objects.create_user(username = email, password = password, role = "Student")
+
+                OTP.objects.create(profile=profile)
+
+                student.profile = profile
+
+                # student.batch = 'hello' 
+
+            # student.batch = 'hello' thenn try to create student then get error but profile will created but student record is not created 
+            
+                student.save()
+
+                recepient = student.email
+
+                template  ='email/credentials.html'
+
+                site_link  = config('SITE_LINK')
+
+                context = {'username': student.email, 'password': password , 'name' :f'{student.first_name}{student.last_name}','site_link':site_link}
+
+                title = "Login Credentials"
+
+                thread = threading.Thread(target=sent_email,args=(recepient,template,title,context)) #create thread object , in target function have parameter then add args other wise skip args. args is tuple. 
+
+                thread.start()
+                # sent_email(recepient,template,title,context)
+
+                return redirect("students-list")
         
         data = {'form':form}
         
@@ -180,7 +253,7 @@ class AddStudentView(View):
         # place = post_data.get("place")
       
         # student = Students.objects.create(first_name =  first_name ,last_name = last_name,adm_num  = adm_num ,course=course,  email = email , contact_num = contact_num, photo = photo,  dob = dob , education = education,address  = address, place = place , district =  district, pincode = pincode ,batch = batch ,trainer = trainer )
-
+@method_decorator(permitted_users(['Admin','Sales']), name='dispatch') 
 class EditStudentView(View):
      
      form_class = AddStudentForm

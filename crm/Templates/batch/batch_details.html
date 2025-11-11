@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block section %}
+
+<section class="container">
+  <div class="page-inner">
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Batch Details</h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+
+          <!-- Details -->
+          <div class="col-md-8 ms-1">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <strong>Name:</strong>
+                <p class="mb-1">{{batch.name}}</p>
+              </div>
+              <div class="col-md-6">
+                <strong>batch Code:</strong>
+                <p class="mb-1">{{ batch.code }}</p>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <strong>Course</strong>
+                <p class="mb-1">{{ batch.course  }}</p>
+              </div>
+              <div class="col-md-6">
+                <strong>Trainer</strong>
+                <ul>
+                  {% for trainer in batch.trainer.all %}
+                  <li>{{trainer.name}}</li>
+                  {% endfor %}
+                </ul>
+                <!-- <p class="mb-1">{{ batch.tainer }}</p> -->
+              </div>
+            </div>
+         <div class="row mb-3">
+              <div class="col-md-6">
+                <strong>Start Date</strong>
+                <p class="mb-1">{{ batch.start_date }}</p>
+              </div>
+              <div class="col-md-6">
+                <strong>End Date</strong>
+                <p class="mb-1">{{ batch.end_date }}</p>
+              </div>
+            </div>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="card-footer text-end">
+        <a href="{% url 'batch-list' %}" class="btn btn-secondary btn-sm">Back</a>
+        <a  href="{% url 'edit-batch' batch.uuid %}" class="btn btn-warning btn-sm">Edit</a>
+        <a href = "{% url 'delete-batch' batch.uuid %}" class="btn btn-danger btn-sm">Delete</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
